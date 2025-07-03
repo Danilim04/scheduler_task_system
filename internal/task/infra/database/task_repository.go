@@ -85,7 +85,7 @@ func (r *TaskRepositoryMongo) FindAll(ctx context.Context) ([]*entity.Task, erro
 
 	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
 
-	cursor, err := r.collection.Find(ctx, bson.M{"status": true}, opts)
+	cursor, err := r.collection.Find(ctx, bson.M{"status": string(entity.TaskStatusActive)}, opts)
 
 	if err != nil {
 		return nil, err
