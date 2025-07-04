@@ -16,8 +16,8 @@ type TaskRepositoryTemplate struct {
 	TaskCodeTemplatesDir map[string]string
 }
 
-func NewTaskTemplateRepository(rootPath string) (*TaskRepositoryTemplate, error) {
-	tr := &TaskRepositoryTemplate{
+func NewTaskTemplateRepository(rootPath string) (TaskRepositoryTemplate, error) {
+	tr := TaskRepositoryTemplate{
 		rootPath: rootPath,
 		TaskCodeTemplatesDir: map[string]string{
 			"entity":  rootPath + "/internal/task/taskCodeTemplate/taskEntityTemplate",
@@ -26,14 +26,14 @@ func NewTaskTemplateRepository(rootPath string) (*TaskRepositoryTemplate, error)
 		},
 	}
 	if err := LoadTemplates(tr); err != nil {
-		return nil, errors.New("erro ao carregar os templates de task")
+		return tr, errors.New("erro ao carregar os templates de task")
 	}
 	return tr, nil
 }
 
 var TaskCodeTemplates = map[string]*template.Template{}
 
-func LoadTemplates(tr *TaskRepositoryTemplate) error {
+func LoadTemplates(tr TaskRepositoryTemplate) error {
 	var err error
 	TaskCodeTemplates["entity"], err = template.ParseFiles(tr.TaskCodeTemplatesDir["entity"])
 	if err != nil {
@@ -50,7 +50,7 @@ func LoadTemplates(tr *TaskRepositoryTemplate) error {
 	return nil
 }
 
-func (tr *TaskRepositoryTemplate) CreateTemplate(ctx context.Context, task *entity.Task) error {
+func (tr TaskRepositoryTemplate) CreateTemplate(ctx context.Context, task *entity.Task) error {
 
 	taskName := task.Name
 

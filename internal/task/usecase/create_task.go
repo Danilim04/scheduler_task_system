@@ -26,11 +26,12 @@ type CreateTaskInputDto struct {
 }
 
 type CreateTaskUseCase struct {
-	TaskRepository entity.TaskRepositoryInterface
+	TaskRepository         entity.TaskRepositoryInterface
+	TaskRepositoryTemplate entity.TaskRepositoryTemplateInterface
 }
 
-func NewCreateTaskUseCase(taskRepository entity.TaskRepositoryInterface) *CreateTaskUseCase {
-	return &CreateTaskUseCase{TaskRepository: taskRepository}
+func NewCreateTaskUseCase(taskRepository entity.TaskRepositoryInterface, taskRepositoryTemplate entity.TaskRepositoryTemplateInterface) *CreateTaskUseCase {
+	return &CreateTaskUseCase{TaskRepository: taskRepository, TaskRepositoryTemplate: taskRepositoryTemplate}
 }
 
 func (uc *CreateTaskUseCase) Execute(ctx context.Context, input CreateTaskInputDto) (*CreateTaskOutputDto, error) {
@@ -47,7 +48,7 @@ func (uc *CreateTaskUseCase) Execute(ctx context.Context, input CreateTaskInputD
 		return nil, err
 	}
 
-	err = uc.TaskRepository.CreateTemplate(ctx, task)
+	err = uc.TaskRepositoryTemplate.CreateTemplate(ctx, task)
 
 	if err != nil {
 		return nil, err

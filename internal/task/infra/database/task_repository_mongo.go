@@ -5,15 +5,16 @@ import (
 	"errors"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"scheduler_task_system/internal/task/entity"
 )
 
 const (
 	tasksCollection = "tasks"
+	database        = "azapfy"
 )
 
 type TaskRepositoryMongo struct {
@@ -21,10 +22,10 @@ type TaskRepositoryMongo struct {
 	collection *mongo.Collection
 }
 
-func NewTaskRepositoryMongo(db *mongo.Database) *TaskRepositoryMongo {
+func NewTaskRepositoryMongo(client *mongo.Client) *TaskRepositoryMongo {
 	return &TaskRepositoryMongo{
-		database:   db,
-		collection: db.Collection(tasksCollection),
+		database:   client.Database(database),
+		collection: client.Database(database).Collection(tasksCollection),
 	}
 }
 
@@ -57,6 +58,18 @@ func (r *TaskRepositoryMongo) Save(ctx context.Context, task *entity.Task) error
 		return err
 	}
 
+	return nil
+}
+
+func (r *TaskRepositoryMongo) Update(ctx context.Context, task *entity.Task) error {
+	if err := task.IsValid(); err != nil {
+		return err
+	}
+	filter := bson.M{"task_id": task.TaskId}
+	_, err := r.collection.UpdateOne(ctx, filter, task)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
