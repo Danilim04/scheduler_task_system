@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -8,12 +9,13 @@ import (
 )
 
 type TaskRepositoryInterface interface {
-	ExistsByID(id TaskID) (bool, error)
-	Save(task *Task) error
-	FindByID(id TaskID) (*Task, error)
-	FindAll() ([]*Task, error)
-	DeleteByID(id TaskID) error
-	Update(task *Task) error
+	ExistsByID(ctx context.Context, id TaskID) (bool, error)
+	Save(ctx context.Context, task *Task) error
+	CreateTemplate(ctx context.Context, task *Task) error
+	FindByID(ctx context.Context, id TaskID) (*Task, error)
+	FindAll(ctx context.Context) ([]*Task, error)
+	DeleteByID(ctx context.Context, id TaskID) error
+	Update(ctx context.Context, task *Task) error
 }
 
 type TaskStatus string
@@ -55,9 +57,9 @@ type TaskExecution struct {
 	Duration        time.Duration          `json:"duration" bson:"duration"`
 }
 
-func newTask(
+func NewCreateTask(
 	id TaskID,
-	name,
+	name string,
 	description string,
 	config map[string]interface{},
 	expression string,
@@ -87,12 +89,12 @@ func newTask(
 
 func (s *Task) IsValid() error {
 	if s.Name == "" {
-		return errors.New("invalid task ID")
+		return errors.New("invalid task name")
 	}
 	if s.Description == "" {
 		return errors.New("invalid task description")
 	}
-	if s.Config == nil {
+	if len(s.Config) == 0 {
 		return errors.New("invalid task config")
 	}
 	if s.Status != TaskStatusActive && s.Status != TaskStatusInactive {
