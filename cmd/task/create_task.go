@@ -22,11 +22,11 @@ func main() {
 	var err error
 	repositoryTemplate, err := codetemplate.NewTaskTemplateRepository(rootpath)
 	if err != nil {
-		fmt.Println("erro para conectar no banco de dados")
+		panic(err)
 	}
 	client, err := connectMongodb()
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 	defer disconnectMongodb(client)
 	repositoryMongo := database.NewTaskRepositoryMongo(client)

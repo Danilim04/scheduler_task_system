@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"scheduler_task_system/internal/task/entity"
 	"time"
 )
@@ -43,15 +44,16 @@ func (uc *CreateTaskUseCase) Execute(ctx context.Context, input CreateTaskInputD
 		input.Config,
 		input.Expression,
 	)
-
 	if err != nil {
 		return nil, err
 	}
 
-	err = uc.TaskRepositoryTemplate.CreateTemplate(ctx, task)
+	if err := uc.TaskRepositoryTemplate.CreateTemplate(ctx, task); err != nil {
+		return nil, errors.New("falha ao criar o código de template")
+	}
 
-	if err != nil {
-		return nil, err
+	if err := uc.TaskRepository.Save(ctx, task); err != nil {
+		return nil, errors.New("falha ao criar task no banco de dados")
 	}
 
 	return &CreateTaskOutputDto{
