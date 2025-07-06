@@ -24,9 +24,9 @@ type TaskCodeTemplates struct {
 func NewTaskTemplateRepository(rootPath string) (*TaskRepositoryTemplate, error) {
 
 	TaskCodeTemplatesDir := map[string]string{
-		"entity":  rootPath + "/internal/task/taskCodeTemplate/entity/taskEntityTemplate.tmpl",
-		"useCase": rootPath + "/internal/task/taskCodeTemplate/entity/taskEntityTemplate.tmpl",
-		"infra":   rootPath + "/internal/task/taskCodeTemplate/entity/taskEntityTemplate.tmpl",
+		"entity":  rootPath + "/internal/taskCodeTemplate/entity/taskEntityTemplate.tmpl",
+		"useCase": rootPath + "/internal/taskCodeTemplate/useCase/taskEntityTemplate.tmpl",
+		"infra":   rootPath + "/internal/taskCodeTemplate/infra/taskEntityTemplate.tmpl",
 	}
 	tt, err := LoadTemplates(TaskCodeTemplatesDir)
 	if err != nil {

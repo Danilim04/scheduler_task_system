@@ -1,0 +1,29 @@
+package entity
+
+import "context"
+
+type {{.EntityName}} struct {
+	ID          string                 
+	Name        string                 
+	Description string                 
+	Config      map[string]interface{} 
+	CreatedAt   string                 
+	UpdatedAt   string                 
+}
+
+type {{.EntityName}}TaskExecutor interface {
+	Execute(ctx context.Context, config map[string]interface{}) (*{{.EntityName}}TaskResult, error)
+	GetMetadata() {{.EntityName}}TaskMetadata
+}
+
+type {{.EntityName}}TaskResult struct {
+	Success bool                   
+	Data    map[string]interface{} 
+	Error   string                 
+}
+
+type {{.EntityName}}TaskMetadata struct {
+	Name        string            
+	Description string            
+	ConfigSpec  map[string]string 
+}
