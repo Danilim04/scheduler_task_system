@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"scheduler_task_system/internal/task/infra/codetemplate"
-	"scheduler_task_system/internal/task/infra/database"
-	"scheduler_task_system/internal/task/usecase"
+	"scheduler_task_system/internal/core/usecase"
+	"scheduler_task_system/internal/infra/mongodb"
+	"scheduler_task_system/internal/infra/template"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -20,7 +20,7 @@ var rootpath string = os.Getenv("GO_ROOTPATH")
 
 func main() {
 	var err error
-	repositoryTemplate, err := codetemplate.NewTaskTemplateRepository(rootpath)
+	repositoryTemplate, err := template.NewTaskTemplateRepository(rootpath)
 	if err != nil {
 		panic(err)
 	}
@@ -29,7 +29,7 @@ func main() {
 		panic(err)
 	}
 	defer disconnectMongodb(client)
-	repositoryMongo := database.NewTaskRepositoryMongo(client)
+	repositoryMongo := mongodb.NewTaskRepositoryMongo(client)
 	uc := usecase.NewCreateTaskUseCase(repositoryMongo, repositoryTemplate)
 
 	input := usecase.CreateTaskInputDto{

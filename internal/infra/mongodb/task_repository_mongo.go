@@ -1,4 +1,4 @@
-package database
+package mongodb
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
-	"scheduler_task_system/internal/task/entity"
+	"scheduler_task_system/internal/core/entity"
 )
 
 const (

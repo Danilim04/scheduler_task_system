@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"scheduler_task_system/internal/task/entity"
+	"scheduler_task_system/internal/core/entity"
 
 	"github.com/stretchr/testify/assert"
 )

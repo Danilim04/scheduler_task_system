@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"scheduler_task_system/internal/task/entity"
-	"scheduler_task_system/internal/task/usecase"
+	"scheduler_task_system/internal/core/entity"
+	"scheduler_task_system/internal/core/usecase"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -51,7 +51,7 @@ type MockTaskRepositoryTemplate struct {
 	mock.Mock
 }
 
-func (m *MockTaskRepositoryTemplate) CreateTemplate(ctx context.Context, task *entity.Task) error {
+func (m *MockTaskRepositoryTemplate) Generate(ctx context.Context, task *entity.Task) error {
 	args := m.Called(ctx, task)
 	return args.Error(0)
 }
