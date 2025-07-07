@@ -1,4 +1,4 @@
-package codetemplate
+package template
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"scheduler_task_system/internal/task/entity"
+	"scheduler_task_system/internal/core/entity"
 	"strings"
 	"text/template"
 )
@@ -24,13 +24,13 @@ type TaskCodeTemplates struct {
 func NewTaskTemplateRepository(rootPath string) (*TaskRepositoryTemplate, error) {
 
 	TaskCodeTemplatesDir := map[string]string{
-		"entity":  rootPath + "/internal/taskCodeTemplate/entity/taskEntityTemplate.tmpl",
-		"useCase": rootPath + "/internal/taskCodeTemplate/useCase/taskEntityTemplate.tmpl",
-		"infra":   rootPath + "/internal/taskCodeTemplate/infra/taskEntityTemplate.tmpl",
+		"entity":  rootPath + "/internal/infra/template/entity/taskEntityTemplate.tmpl",
+		"useCase": rootPath + "/internal/infra/template/usecase/taskEntityTemplate.tmpl",
+		"infra":   rootPath + "/internal/infra/template/infra/taskEntityTemplate.tmpl",
 	}
 	tt, err := LoadTemplates(TaskCodeTemplatesDir)
 	if err != nil {
-		return nil, errors.New("erro ao carregar os templates de task")
+		return nil, errors.New("erro ao carregar os templates de task" + err.Error())
 	}
 
 	tr := &TaskRepositoryTemplate{
@@ -68,7 +68,7 @@ func LoadTemplates(tr map[string]string) (*TaskCodeTemplates, error) {
 	return templates, nil
 }
 
-func (tr *TaskRepositoryTemplate) CreateTemplate(ctx context.Context, task *entity.Task) error {
+func (tr *TaskRepositoryTemplate) Generate(ctx context.Context, task *entity.Task) error {
 
 	taskName := task.Name
 

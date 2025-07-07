@@ -3,7 +3,9 @@ package usecase
 import (
 	"context"
 	"errors"
-	"scheduler_task_system/internal/task/entity"
+	"scheduler_task_system/internal/core/entity"
+	"scheduler_task_system/internal/core/port"
+
 	"time"
 )
 
@@ -27,11 +29,11 @@ type CreateTaskInputDto struct {
 }
 
 type CreateTaskUseCase struct {
-	TaskRepository         entity.TaskRepositoryInterface
-	TaskRepositoryTemplate entity.TaskRepositoryTemplateInterface
+	TaskRepository         port.TaskRepositoryInterface
+	TaskRepositoryTemplate port.TaskRepositoryTemplateInterface
 }
 
-func NewCreateTaskUseCase(taskRepository entity.TaskRepositoryInterface, taskRepositoryTemplate entity.TaskRepositoryTemplateInterface) *CreateTaskUseCase {
+func NewCreateTaskUseCase(taskRepository port.TaskRepositoryInterface, taskRepositoryTemplate port.TaskRepositoryTemplateInterface) *CreateTaskUseCase {
 	return &CreateTaskUseCase{TaskRepository: taskRepository, TaskRepositoryTemplate: taskRepositoryTemplate}
 }
 
@@ -45,15 +47,15 @@ func (uc *CreateTaskUseCase) Execute(ctx context.Context, input CreateTaskInputD
 		input.Expression,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("falha ao criar a task" + err.Error())
 	}
 
-	if err := uc.TaskRepositoryTemplate.CreateTemplate(ctx, task); err != nil {
-		return nil, errors.New("falha ao criar o código de template")
+	if err := uc.TaskRepositoryTemplate.Generate(ctx, task); err != nil {
+		return nil, errors.New("falha ao criar o código de template da task" + err.Error())
 	}
 
 	if err := uc.TaskRepository.Save(ctx, task); err != nil {
-		return nil, errors.New("falha ao criar task no banco de dados")
+		return nil, errors.New("falha ao criar task no banco de dados" + err.Error())
 	}
 
 	return &CreateTaskOutputDto{

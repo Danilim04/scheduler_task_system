@@ -1,25 +1,11 @@
 package entity
 
 import (
-	"context"
 	"errors"
 	"time"
 
 	"github.com/robfig/cron"
 )
-
-type TaskRepositoryTemplateInterface interface {
-	CreateTemplate(ctx context.Context, task *Task) error
-}
-
-type TaskRepositoryInterface interface {
-	ExistsByID(ctx context.Context, id TaskID) (bool, error)
-	Save(ctx context.Context, task *Task) error
-	FindByID(ctx context.Context, id TaskID) (*Task, error)
-	FindAll(ctx context.Context) ([]*Task, error)
-	DeleteByID(ctx context.Context, id TaskID) error
-	Update(ctx context.Context, task *Task) error
-}
 
 type TaskStatus string
 
