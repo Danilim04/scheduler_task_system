@@ -20,8 +20,7 @@ func NewScheduleTask(task entity.Task, f func(), se port.ScheduleEngine) *Schedu
 }
 
 type ScheduleInputDto struct {
-	Task             entity.Task
-	ProducerEnginner port.MessagingEngine
+	Task entity.Task
 }
 
 func (st *ScheduleTaskUc) Execute(ctx context.Context, input ScheduleInputDto) (gocron.Job, error) {
@@ -34,11 +33,4 @@ func (st *ScheduleTaskUc) Execute(ctx context.Context, input ScheduleInputDto) (
 		return nil, errors.New("erro ao agendar a tarefa" + err.Error())
 	}
 	return j, nil
-}
-
-func (st *ScheduleTaskUc) ExecuteRemove(ctx context.Context, taskId entity.TaskID) error {
-	if err := st.ScheduleEngine.Remove(ctx, taskId); err != nil {
-		return errors.New("erro ao remover agendamento da tarefa" + err.Error())
-	}
-	return nil
 }

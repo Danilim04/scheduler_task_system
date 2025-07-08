@@ -33,3 +33,10 @@ func (g *GoCron) Register(ctx context.Context, taskName entity.TaskID, schedule 
 	}
 	return j, nil
 }
+
+func (g *GoCron) Start() error {
+	if err := g.Start(); err != nil {
+		return nil
+	}
+	return nil
+}

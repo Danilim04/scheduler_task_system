@@ -22,11 +22,11 @@ type TaskRepositoryMongo struct {
 	collection *mongo.Collection
 }
 
-func NewTaskRepositoryMongo(client *mongo.Client) *TaskRepositoryMongo {
+func NewTaskRepositoryMongo(client *mongo.Client) (*TaskRepositoryMongo, error) {
 	return &TaskRepositoryMongo{
 		database:   client.Database(database),
 		collection: client.Database(database).Collection(tasksCollection),
-	}
+	}, nil
 }
 
 func (r *TaskRepositoryMongo) ExistsByID(ctx context.Context, id entity.TaskID) (bool, error) {
@@ -153,4 +153,29 @@ func (r *TaskRepositoryMongo) bsonToTask(doc bson.M) (*entity.Task, error) {
 		return nil, err
 	}
 	return task, nil
+}
+
+func ConnectMongodb() (*mongo.Client, error) {
+	uri := "mongodb://dev:dev123@mongodb:27017/"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	clientOptions := options.Client().ApplyURI(uri)
+
+	client, err := mongo.Connect(clientOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+func DisconnectMongodb(ctx context.Context, client *mongo.Client) error {
+	return client.Disconnect(ctx)
 }

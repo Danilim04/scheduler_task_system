@@ -5,6 +5,7 @@ go 1.24.4
 require (
 	github.com/go-co-op/gocron/v2 v2.16.2
 	github.com/google/uuid v1.6.0
+	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/robfig/cron v1.2.0
 	go.mongodb.org/mongo-driver/v2 v2.2.2
 )
