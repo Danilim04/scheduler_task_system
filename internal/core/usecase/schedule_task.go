@@ -5,7 +5,8 @@ import (
 	"errors"
 	"scheduler_task_system/internal/core/entity"
 	"scheduler_task_system/internal/core/port"
-	"time"
+
+	"github.com/go-co-op/gocron/v2"
 )
 
 type ScheduleTaskUc struct {
@@ -23,26 +24,16 @@ type ScheduleInputDto struct {
 	ProducerEnginner port.MessagingEngine
 }
 
-func (st *ScheduleTaskUc) Execute(ctx context.Context, input ScheduleInputDto) error {
+func (st *ScheduleTaskUc) Execute(ctx context.Context, input ScheduleInputDto) (gocron.Job, error) {
+
 	taskName := input.Task.TaskId
+	payload := input.Task.Payload
 	schedule := input.Task.Schedule
-	fn := func() error {
-		taskexecutin := entity.TaskExecution{}
-		execCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		uc := NewProducerTask(input.ProducerEnginner)
-		input := ProducerTaskInput{
-			TaskExecution: taskexecutin,
-		}
-		if err := uc.Execute(execCtx, input); err != nil {
-			return err
-		}
-		return nil
+	j, err := st.ScheduleEngine.Register(ctx, taskName, schedule, payload)
+	if err != nil {
+		return nil, errors.New("erro ao agendar a tarefa" + err.Error())
 	}
-	if err := st.ScheduleEngine.Register(ctx, taskName, schedule, fn); err != nil {
-		return errors.New("erro ao agendar a tarefa" + err.Error())
-	}
-	return nil
+	return j, nil
 }
 
 func (st *ScheduleTaskUc) ExecuteRemove(ctx context.Context, taskId entity.TaskID) error {

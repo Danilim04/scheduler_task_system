@@ -19,10 +19,11 @@ func NewProducerTask(pe port.MessagingEngine) *ProducerTask {
 
 type ProducerTaskInput struct {
 	TaskExecution entity.TaskExecution
+	Payload       []byte
 }
 
 func (pe *ProducerTask) Execute(ctx context.Context, input ProducerTaskInput) error {
-	if err := pe.ProducerEnginner.Publish(ctx, input.TaskExecution); err != nil {
+	if err := pe.ProducerEnginner.Publish(ctx, input.TaskExecution, input.Payload); err != nil {
 		return errors.New("erro ao produzir tarefa para a mensageria" + err.Error())
 	}
 	return nil

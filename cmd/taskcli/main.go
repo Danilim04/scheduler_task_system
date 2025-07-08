@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"scheduler_task_system/internal/core/usecase"
 	"scheduler_task_system/internal/infra/mongodb"
@@ -32,14 +34,19 @@ func main() {
 	repositoryMongo := mongodb.NewTaskRepositoryMongo(client)
 	uc := usecase.NewCreateTaskUseCase(repositoryMongo, repositoryTemplate)
 
+	payloadBytes, err := json.Marshal(map[string]interface{}{
+		"key": "value",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	input := usecase.CreateTaskInputDto{
 		TaskId:      "task_test",
 		Name:        "task_test",
 		Description: "Test description",
-		Config: map[string]interface{}{
-			"key": "value",
-		},
-		Expression: "0 * * * *",
+		Payload:     payloadBytes,
+		Expression:  "0 * * * *",
 	}
 
 	exec, err := uc.Execute(ctx, input)

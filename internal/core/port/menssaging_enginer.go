@@ -6,6 +6,6 @@ import (
 )
 
 type MessagingEngine interface {
-	Publish(ctx context.Context, task entity.TaskExecution) error
+	Publish(ctx context.Context, taskExecutin entity.TaskExecution, payload []byte) error
 	Consumer(ctx context.Context) error
 }
