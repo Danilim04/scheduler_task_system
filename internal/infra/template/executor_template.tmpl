@@ -1,0 +1,20 @@
+package {{.TaskName}}
+
+import (
+    "context"
+    "scheduler_task_system/internal/app"
+    "scheduler_task_system/internal/core/port"
+)
+
+type executor struct{} // depende de repositório? injeta aqui
+
+func New() port.TaskExecutor { return &executor{} }
+
+func (e *executor) Execute(ctx context.Context, p []byte) error {
+    // lógica executar sua tarefa aqui
+    return nil
+}
+
+func init() {
+    app.Default.Register("email_welcome", New)
+}
