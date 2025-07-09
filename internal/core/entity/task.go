@@ -18,19 +18,19 @@ const (
 type TaskID string
 
 type Task struct {
-	TaskId      TaskID     `json:"taskId" bson:"task_id"`
-	Name        string     `json:"name" bson:"name"`
-	Description string     `json:"description" bson:"description"`
-	Schedule    Schedule   `json:"schedule" bson:"schedule"`
-	Status      TaskStatus `json:"status" bson:"status"`
-	Payload     []byte     `json:"payload" bson:"payload"`
-	CreatedAt   time.Time  `json:"created_at" bson:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at" bson:"updated_at"`
+	TaskId      TaskID                 `json:"taskId" bson:"task_id"`
+	Name        string                 `json:"name" bson:"name"`
+	Description string                 `json:"description" bson:"description"`
+	Schedule    Schedule               `json:"schedule" bson:"schedule"`
+	Status      TaskStatus             `json:"status" bson:"status"`
+	Payload     map[string]interface{} `json:"payload" bson:"payload"`
+	CreatedAt   time.Time              `json:"created_at" bson:"created_at"`
+	UpdatedAt   time.Time              `json:"updated_at" bson:"updated_at"`
 }
 
 type Schedule struct {
-	Expression string `json:"expression" bson:"expression"`
-	IdJob      uuid.UUID
+	Expression string     `json:"expression" bson:"expression"`
+	IdJob      *uuid.UUID `json:"idJob,omitempty" bson:"idJob,omitempty"`
 	NextRun    *time.Time `json:"next_run,omitempty" bson:"next_run"`
 	LastRun    *time.Time `json:"last_run,omitempty" bson:"last_run"`
 }
@@ -52,7 +52,7 @@ func NewCreateTask(
 	id TaskID,
 	name string,
 	description string,
-	payload []byte,
+	payload map[string]interface{},
 	expression string,
 ) (*Task, error) {
 	task := &Task{
@@ -61,6 +61,7 @@ func NewCreateTask(
 		Description: description,
 		Payload:     payload,
 		Schedule: Schedule{
+			IdJob:      nil,
 			Expression: expression,
 			NextRun:    nil,
 			LastRun:    nil,

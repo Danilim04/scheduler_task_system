@@ -1,4 +1,4 @@
-package {{.TaskName}}
+package main
 
 import (
     "context"
@@ -8,7 +8,7 @@ import (
 
 type executer struct{} // depende de repositório? injeta aqui
 
-func New() port.TaskExecuter { return &executor{} }
+func New() port.TaskExecuter { return &executer{} }
 
 func (e *executer) Execute(ctx context.Context, p []byte) error {
     // lógica executar sua tarefa aqui
@@ -16,5 +16,5 @@ func (e *executer) Execute(ctx context.Context, p []byte) error {
 }
 
 func init() {
-    app.Default.Register({{.TaskName}}, New)
+    app.Default.Register("{{.TaskName}}", New)
 }

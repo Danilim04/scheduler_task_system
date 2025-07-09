@@ -149,7 +149,7 @@ func (r *TaskRepositoryMongo) bsonToTask(doc bson.M) (*entity.Task, error) {
 		TaskId:      doc["task_id"].(entity.TaskID),
 		Name:        doc["name"].(string),
 		Description: doc["description"].(string),
-		Payload:     doc["Payload"].([]byte),
+		Payload:     doc["Payload"].(map[string]interface{}),
 		Schedule:    doc["schedule"].(entity.Schedule),
 		Status:      entity.TaskStatus(doc["status"].(string)),
 		CreatedAt:   doc["created_at"].(time.Time),
@@ -162,7 +162,7 @@ func (r *TaskRepositoryMongo) bsonToTask(doc bson.M) (*entity.Task, error) {
 }
 
 func ConnectMongodb() (*mongo.Client, error) {
-	uri := "mongodb://dev:dev123@mongodb:27017/"
+	uri := "mongodb://dev:dev123@localhost:27017/"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

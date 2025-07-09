@@ -3,52 +3,67 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"os"
+
 	"scheduler_task_system/internal/core/usecase"
 	"scheduler_task_system/internal/infra/mongodb"
 	"scheduler_task_system/internal/infra/template"
 )
 
-var ctx context.Context
-
-var rootpath string = os.Getenv("GO_ROOTPATH")
-
 func main() {
-	var err error
-	repositoryTemplate, err := template.NewTaskTemplateRepository(rootpath)
-	if err != nil {
-		panic(err)
-	}
-	client, err := mongodb.ConnectMongodb()
-	if err != nil {
-		panic(err)
-	}
-	defer mongodb.DisconnectMongodb(ctx, client)
-	repositoryMongo := mongodb.NewTaskRepositoryMongo(client)
-	uc := usecase.NewCreateTaskUseCase(repositoryMongo, repositoryTemplate)
+	// ----------- Flags -----------
+	taskID := flag.String("id", "", "ID único da task (obrigatório)")
+	name := flag.String("name", "", "Nome da task (obrigatório)")
+	desc := flag.String("desc", "", "Descrição da task")
+	cronExpr := flag.String("cron", "0 * * * *", "Expressão CRON")
+	payload := flag.String("payload", "{}", "JSON bruto do payload")
+	rootPath := flag.String("root", os.Getenv("GO_ROOTPATH"), "Path dos templates")
 
-	payloadBytes, err := json.Marshal(map[string]interface{}{
-		"key": "value",
-	})
+	flag.Parse()
+
+	if *taskID == "" || *name == "" {
+		flag.Usage()
+		log.Fatal("as flags -id e -name são obrigatórias")
+	}
+
+	payloadBytes := []byte(*payload)
+	if !json.Valid(payloadBytes) {
+		log.Fatalf("payload não é JSON válido: %s", *payload)
+	}
+
+	// ----------- Boot de infra -----------
+	ctx := context.Background()
+
+	repoTpl, err := template.NewTaskTemplateRepository(*rootPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	client, err := mongodb.ConnectMongodb()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer mongodb.DisconnectMongodb(ctx, client)
+
+	repoMongo := mongodb.NewTaskRepositoryMongo(client)
+
+	// ----------- Caso de uso -----------
+	uc := usecase.NewCreateTaskUseCase(repoMongo, repoTpl)
+
 	input := usecase.CreateTaskInputDto{
-		TaskId:      "task_test",
-		Name:        "task_test",
-		Description: "Test description",
+		TaskId:      *taskID,
+		Name:        *name,
+		Description: *desc,
 		Payload:     payloadBytes,
-		Expression:  "0 * * * *",
+		Expression:  *cronExpr,
 	}
 
 	exec, err := uc.Execute(ctx, input)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalf("falha ao criar task: %v", err)
 	}
-
-	fmt.Println(exec)
-
+	fmt.Println("Task criada com sucesso:", exec)
 }

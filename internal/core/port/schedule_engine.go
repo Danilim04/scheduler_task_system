@@ -8,6 +8,6 @@ import (
 )
 
 type ScheduleEngine interface {
-	Register(ctx context.Context, taskName entity.TaskID, schedule entity.Schedule, payload []byte) (gocron.Job, error)
+	Register(ctx context.Context, taskName entity.TaskID, schedule entity.Schedule, payload map[string]interface{}) (gocron.Job, error)
 	Start() error
 }

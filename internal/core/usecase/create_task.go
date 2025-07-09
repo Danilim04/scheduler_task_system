@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"scheduler_task_system/internal/core/entity"
 	"scheduler_task_system/internal/core/port"
@@ -39,11 +40,16 @@ func NewCreateTaskUseCase(taskRepository port.TaskRepositoryInterface, taskRepos
 
 func (uc *CreateTaskUseCase) Execute(ctx context.Context, input CreateTaskInputDto) (*CreateTaskOutputDto, error) {
 
+	var payload map[string]interface{}
+	if err := json.Unmarshal(input.Payload, &payload); err != nil {
+		return nil, err
+	}
+
 	task, err := entity.NewCreateTask(
 		entity.TaskID(input.TaskId),
 		input.Name,
 		input.Description,
-		input.Payload,
+		payload,
 		input.Expression,
 	)
 	if err != nil {
