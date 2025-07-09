@@ -10,16 +10,16 @@
             "request": "launch",
             "mode": "debug",
             "program": "${file}",
-            "args": []
+            //"args": []
             // arugmentos comando task
-            // "args": [
-            //     "-id=task_test",
-            //     "-name=Task de teste",
-            //     "-desc=Só um exemplo",
-            //     "-cron=*/15 * * * *",
-            //     "-payload={\"key\":\"value\",\"x\":42}",
-            //     "-root=/home/danielferraz/scheduller_task_system"
-            // ]
+            "args": [
+                "-id=task_test",
+                "-name=Task de teste",
+                "-desc=Só um exemplo",
+                "-cron=*/15 * * * *",
+                "-payload={\"key\":\"value\",\"x\":42}",
+                "-root=/home/danielferraz/scheduller_task_system"
+            ]
         },
         {
             "name": "Launch Package",
