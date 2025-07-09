@@ -26,11 +26,7 @@ func main() {
 		panic(err)
 	}
 	defer mongodb.DisconnectMongodb(ctx, client)
-	repositoryMongo, err := mongodb.NewTaskRepositoryMongo(client)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	repositoryMongo := mongodb.NewTaskRepositoryMongo(client)
 	uc := usecase.NewCreateTaskUseCase(repositoryMongo, repositoryTemplate)
 
 	payloadBytes, err := json.Marshal(map[string]interface{}{

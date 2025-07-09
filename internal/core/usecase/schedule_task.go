@@ -13,7 +13,7 @@ type ScheduleTaskUc struct {
 	ScheduleEngine port.ScheduleEngine
 }
 
-func NewScheduleTask(task entity.Task, f func(), se port.ScheduleEngine) *ScheduleTaskUc {
+func NewScheduleTask(se port.ScheduleEngine) *ScheduleTaskUc {
 	return &ScheduleTaskUc{
 		ScheduleEngine: se,
 	}

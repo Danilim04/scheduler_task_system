@@ -7,21 +7,22 @@ import (
 	"github.com/go-co-op/gocron/v2"
 )
 
-type GoCron struct {
+type ScheduleEngine struct {
 	GoCron gocron.Scheduler
 }
 
-func NewShedulerEngginer() (*GoCron, error) {
+func NewShedulerEngginer() (*ScheduleEngine, error) {
 	s, err := gocron.NewScheduler()
 	if err != nil {
 		return nil, err
 	}
-	return &GoCron{
+
+	return &ScheduleEngine{
 		GoCron: s,
 	}, nil
 }
 
-func (g *GoCron) Register(ctx context.Context, taskName entity.TaskID, schedule entity.Schedule, payload []byte) (gocron.Job, error) {
+func (g *ScheduleEngine) Register(ctx context.Context, taskName entity.TaskID, schedule entity.Schedule, payload []byte) (gocron.Job, error) {
 	task := gocron.NewTask(
 		ExecutarTask,
 		taskName,
@@ -34,7 +35,7 @@ func (g *GoCron) Register(ctx context.Context, taskName entity.TaskID, schedule 
 	return j, nil
 }
 
-func (g *GoCron) Start() error {
+func (g *ScheduleEngine) Start() error {
 	if err := g.Start(); err != nil {
 		return nil
 	}

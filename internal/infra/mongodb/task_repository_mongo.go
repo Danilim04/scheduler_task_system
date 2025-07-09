@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -22,11 +23,11 @@ type TaskRepositoryMongo struct {
 	collection *mongo.Collection
 }
 
-func NewTaskRepositoryMongo(client *mongo.Client) (*TaskRepositoryMongo, error) {
+func NewTaskRepositoryMongo(client *mongo.Client) *TaskRepositoryMongo {
 	return &TaskRepositoryMongo{
 		database:   client.Database(database),
 		collection: client.Database(database).Collection(tasksCollection),
-	}, nil
+	}
 }
 
 func (r *TaskRepositoryMongo) ExistsByID(ctx context.Context, id entity.TaskID) (bool, error) {
@@ -95,27 +96,32 @@ func (r *TaskRepositoryMongo) FindByID(ctx context.Context, id entity.TaskID) (*
 }
 
 func (r *TaskRepositoryMongo) FindAll(ctx context.Context) ([]*entity.Task, error) {
+	opts := options.Find().
+		SetSort(bson.D{{Key: "created_at", Value: -1}})
 
-	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
-
-	cursor, err := r.collection.Find(ctx, bson.M{"status": string(entity.TaskStatusActive)}, opts)
-
+	cur, err := r.collection.Find(ctx,
+		bson.M{"status": string(entity.TaskStatusActive)}, opts)
 	if err != nil {
 		return nil, err
 	}
+	defer cur.Close(ctx)
 
 	var tasks []*entity.Task
 
-	for cursor.Next(ctx) {
-		var result bson.M
-		task, err := r.bsonToTask(result)
+	for cur.Next(ctx) {
+		var doc bson.M
+		if err := cur.Decode(&doc); err != nil {
+			return nil, fmt.Errorf("falha ao decodificar documento: %w", err)
+		}
+
+		task, err := r.bsonToTask(doc)
 		if err != nil {
-			return nil, errors.New("erro ao converter task do banco: " + err.Error())
+			return nil, fmt.Errorf("erro ao converter task: %w", err)
 		}
 		tasks = append(tasks, task)
 	}
 
-	if err := cursor.Err(); err != nil {
+	if err := cur.Err(); err != nil {
 		return nil, err
 	}
 

@@ -9,5 +9,5 @@ import (
 
 type ScheduleEngine interface {
 	Register(ctx context.Context, taskName entity.TaskID, schedule entity.Schedule, payload []byte) (gocron.Job, error)
-	Start(ctx context.Context) error
+	Start() error
 }
