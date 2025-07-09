@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -46,7 +47,7 @@ func (r *TaskRepositoryMongo) Save(ctx context.Context, task *entity.Task) error
 		"task_id":     string(task.TaskId),
 		"name":        task.Name,
 		"description": task.Description,
-		"config":      task.Config,
+		"payload":     task.Payload,
 		"schedule":    task.Schedule,
 		"status":      string(task.Status),
 		"created_at":  task.CreatedAt,
@@ -95,27 +96,32 @@ func (r *TaskRepositoryMongo) FindByID(ctx context.Context, id entity.TaskID) (*
 }
 
 func (r *TaskRepositoryMongo) FindAll(ctx context.Context) ([]*entity.Task, error) {
+	opts := options.Find().
+		SetSort(bson.D{{Key: "created_at", Value: -1}})
 
-	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
-
-	cursor, err := r.collection.Find(ctx, bson.M{"status": string(entity.TaskStatusActive)}, opts)
-
+	cur, err := r.collection.Find(ctx,
+		bson.M{"status": string(entity.TaskStatusActive)}, opts)
 	if err != nil {
 		return nil, err
 	}
+	defer cur.Close(ctx)
 
 	var tasks []*entity.Task
 
-	for cursor.Next(ctx) {
-		var result bson.M
-		task, err := r.bsonToTask(result)
+	for cur.Next(ctx) {
+		var doc bson.M
+		if err := cur.Decode(&doc); err != nil {
+			return nil, fmt.Errorf("falha ao decodificar documento: %w", err)
+		}
+
+		task, err := r.bsonToTask(doc)
 		if err != nil {
-			return nil, errors.New("erro ao converter task do banco: " + err.Error())
+			return nil, fmt.Errorf("erro ao converter task: %w", err)
 		}
 		tasks = append(tasks, task)
 	}
 
-	if err := cursor.Err(); err != nil {
+	if err := cur.Err(); err != nil {
 		return nil, err
 	}
 
@@ -139,11 +145,12 @@ func (r *TaskRepositoryMongo) DeleteByID(ctx context.Context, id entity.TaskID) 
 }
 
 func (r *TaskRepositoryMongo) bsonToTask(doc bson.M) (*entity.Task, error) {
+
 	task := &entity.Task{
 		TaskId:      doc["task_id"].(entity.TaskID),
 		Name:        doc["name"].(string),
 		Description: doc["description"].(string),
-		Config:      doc["config"].(map[string]interface{}),
+		Payload:     doc["Payload"].(map[string]interface{}),
 		Schedule:    doc["schedule"].(entity.Schedule),
 		Status:      entity.TaskStatus(doc["status"].(string)),
 		CreatedAt:   doc["created_at"].(time.Time),
@@ -153,4 +160,29 @@ func (r *TaskRepositoryMongo) bsonToTask(doc bson.M) (*entity.Task, error) {
 		return nil, err
 	}
 	return task, nil
+}
+
+func ConnectMongodb() (*mongo.Client, error) {
+	uri := "mongodb://dev:dev123@localhost:27017/"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	clientOptions := options.Client().ApplyURI(uri)
+
+	client, err := mongo.Connect(clientOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+func DisconnectMongodb(ctx context.Context, client *mongo.Client) error {
+	return client.Disconnect(ctx)
 }

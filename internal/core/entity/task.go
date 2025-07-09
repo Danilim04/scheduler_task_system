@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/robfig/cron"
 )
 
@@ -20,15 +21,16 @@ type Task struct {
 	TaskId      TaskID                 `json:"taskId" bson:"task_id"`
 	Name        string                 `json:"name" bson:"name"`
 	Description string                 `json:"description" bson:"description"`
-	Config      map[string]interface{} `json:"config" bson:"config"`
 	Schedule    Schedule               `json:"schedule" bson:"schedule"`
 	Status      TaskStatus             `json:"status" bson:"status"`
+	Payload     map[string]interface{} `json:"payload" bson:"payload"`
 	CreatedAt   time.Time              `json:"created_at" bson:"created_at"`
 	UpdatedAt   time.Time              `json:"updated_at" bson:"updated_at"`
 }
 
 type Schedule struct {
 	Expression string     `json:"expression" bson:"expression"`
+	IdJob      *uuid.UUID `json:"idJob,omitempty" bson:"idJob,omitempty"`
 	NextRun    *time.Time `json:"next_run,omitempty" bson:"next_run"`
 	LastRun    *time.Time `json:"last_run,omitempty" bson:"last_run"`
 }
@@ -50,15 +52,16 @@ func NewCreateTask(
 	id TaskID,
 	name string,
 	description string,
-	config map[string]interface{},
+	payload map[string]interface{},
 	expression string,
 ) (*Task, error) {
 	task := &Task{
 		TaskId:      id,
 		Name:        name,
 		Description: description,
-		Config:      config,
+		Payload:     payload,
 		Schedule: Schedule{
+			IdJob:      nil,
 			Expression: expression,
 			NextRun:    nil,
 			LastRun:    nil,
@@ -82,9 +85,6 @@ func (s *Task) IsValid() error {
 	}
 	if s.Description == "" {
 		return errors.New("invalid task description")
-	}
-	if len(s.Config) == 0 {
-		return errors.New("invalid task config")
 	}
 	if s.Status != TaskStatusActive && s.Status != TaskStatusInactive {
 		return errors.New("invalid task status")

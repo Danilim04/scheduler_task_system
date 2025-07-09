@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"scheduler_task_system/internal/core/entity"
 	"scheduler_task_system/internal/core/port"
@@ -10,22 +11,22 @@ import (
 )
 
 type CreateTaskOutputDto struct {
-	TaskId      entity.TaskID          `json:"taskId"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Config      map[string]interface{} `json:"config"`
-	Schedule    entity.Schedule        `json:"schedule"`
-	Status      entity.TaskStatus      `json:"status"`
-	CreatedAt   time.Time              `json:"createdAt"`
-	UpdatedAt   time.Time              `json:"updatedAt"`
+	TaskId      entity.TaskID     `json:"taskId"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	Payload     []byte            `json:"payload"`
+	Schedule    entity.Schedule   `json:"schedule"`
+	Status      entity.TaskStatus `json:"status"`
+	CreatedAt   time.Time         `json:"createdAt"`
+	UpdatedAt   time.Time         `json:"updatedAt"`
 }
 
 type CreateTaskInputDto struct {
-	TaskId      string                 `json:"taskId"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Config      map[string]interface{} `json:"config"`
-	Expression  string                 `json:"expression"`
+	TaskId      string `json:"taskId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Payload     []byte `json:"payload"`
+	Expression  string `json:"expression"`
 }
 
 type CreateTaskUseCase struct {
@@ -39,11 +40,16 @@ func NewCreateTaskUseCase(taskRepository port.TaskRepositoryInterface, taskRepos
 
 func (uc *CreateTaskUseCase) Execute(ctx context.Context, input CreateTaskInputDto) (*CreateTaskOutputDto, error) {
 
+	var payload map[string]interface{}
+	if err := json.Unmarshal(input.Payload, &payload); err != nil {
+		return nil, err
+	}
+
 	task, err := entity.NewCreateTask(
 		entity.TaskID(input.TaskId),
 		input.Name,
 		input.Description,
-		input.Config,
+		payload,
 		input.Expression,
 	)
 	if err != nil {
@@ -62,7 +68,6 @@ func (uc *CreateTaskUseCase) Execute(ctx context.Context, input CreateTaskInputD
 		TaskId:      task.TaskId,
 		Name:        task.Name,
 		Description: task.Description,
-		Config:      task.Config,
 		Schedule:    task.Schedule,
 		Status:      task.Status,
 		CreatedAt:   task.CreatedAt,
