@@ -145,6 +145,7 @@ func (r *TaskRepositoryMongo) DeleteByID(ctx context.Context, id entity.TaskID) 
 }
 
 func (r *TaskRepositoryMongo) bsonToTask(doc bson.M) (*entity.Task, error) {
+
 	task := &entity.Task{
 		TaskId:      doc["task_id"].(entity.TaskID),
 		Name:        doc["name"].(string),

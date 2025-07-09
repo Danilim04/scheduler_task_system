@@ -1,4 +1,4 @@
-package shedule
+package main
 
 import (
 	"context"
@@ -19,7 +19,9 @@ func main() {
 	}
 	repository := mongodb.NewTaskRepositoryMongo(client)
 	tasks, err := repository.FindAll(ctx)
-
+	if err != nil {
+		log.Fatal(err)
+	}
 	scheduleEngine, err := shedulerenginner.NewShedulerEngginer()
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +39,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		task.Schedule.IdJob = job.ID()
+		idJob := job.ID()
+		task.Schedule.IdJob = &idJob
 		if next, _ := job.NextRun(); next != (time.Time{}) {
 			task.Schedule.NextRun = &next
 		}
